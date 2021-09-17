@@ -3,14 +3,34 @@
 const appInsights = require('applicationinsights')
 const stream = require('stream')
 
+// telemetryProcessor: (envelope: ContractsModule.Contracts.Envelope, context: { http.RequestOptions, http.ClientRequest, http.ClientResponse, Error, correlationContext }) => boolean;
+function investigateJsonErrors(envelope, context) {
+  const data = envelope.data.baseData
+  try {
+    // Test JSON.stringify.
+    JSON.stringify(data)
+  } catch (error) {
+    console.log('Encountered unexpected envelope error')
+    console.log(error)
+    console.log(data)
+  }
+  return true
+}
+
 class Client {
   constructor (options = {}) {
     if (options.setup) {
       options.setup(appInsights)
     } else {
       const iKey = options.key || process.env.APPINSIGHTS_INSTRUMENTATIONKEY
-      appInsights.setup(iKey).start()
+      appInsights.setup(iKey)
     }
+
+    appInsights.setAutoCollectConsole(true, true) // Pass the second argument to also log console.log() statements
+    appInsights.defaultClient.addTelemetryProcessor(investigateJsonErrors)
+
+    appInsights.start()
+
     this.insights = appInsights.defaultClient
   }
 
