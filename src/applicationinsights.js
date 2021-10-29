@@ -26,7 +26,6 @@ class Client {
       appInsights.setup(iKey)
     }
 
-    appInsights.setAutoCollectConsole(true, true) // Pass the second argument to also log console.log() statements
     appInsights.defaultClient.addTelemetryProcessor(investigateJsonErrors)
 
     appInsights.start()
